@@ -5,7 +5,7 @@ const db = require("../db");
 
 router.get('/', async (req, res, next) => {
     try {
-      const results = await db.query(`SELECT * FROM companies`); 
+      const results = await db.query(`SELECT code, name FROM companies`); 
       return res.json({ companies: results.rows })
     } catch (e) {
       return next(e);
@@ -31,8 +31,10 @@ router.get('/:code', async (req, res, next) => {
         res.status(404).send({ message: `Can't find company with code of ${code}` })
       }
       const dataComp = result.rows[0];
-      const dataInv = invRes.rows
-    return res.send({ company: dataComp, invoices: dataInv })
+      const invoices = invRes.rows
+      dataComp.invoices = invoices.map(inv => inv.id)
+ 
+    return res.send({ company: dataComp })
 
     } catch (e) {
       return next(e)
@@ -59,7 +61,7 @@ router.put('/:code', async (req, res, next) => {
         // throw new ExpressError(`Can't update company with code of ${code}`, 404)
         res.status(404).send({ message: `Can't update company with code of ${code}`
       })}
-      return res.send({ companies: results.rows[0] })
+      return res.send({ company: results.rows[0] })
     } catch (e) {
       return next(e)
     }
@@ -69,11 +71,15 @@ router.delete('/:code', async (req, res, next) => {
     try {
       // const code = req.params.code
       const { code } = req.params;
-      const results = await db.query('DELETE FROM companies WHERE code = $1', [code])
-      if (results.rows.length === 0) {
+      // const res = await db.query('SELECT FROM companies WHERE code = $1', [code])
+      const result = await db.query('DELETE FROM companies WHERE code=$1', [code])
+      if (result.rows.length == 0) {
         res.status(404).send({ message: `Can't find company with code of ${code}`
-      })}
-      return res.send({ status: "deleted" })
+      })
+      // throw new ExpressError(`No such company: ${code}`, 404)
+    } else {
+        return res.json({ status: "deleted" })
+      }
     } catch (e) {
       return next(e)
     }
