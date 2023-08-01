@@ -74,9 +74,9 @@ router.delete('/:code', async (req, res, next) => {
       // const res = await db.query('SELECT FROM companies WHERE code = $1', [code])
       const result = await db.query('DELETE FROM companies WHERE code=$1', [code])
       if (result.rows.length == 0) {
-        res.status(404).send({ message: `Can't find company with code of ${code}`
-      })
-      // throw new ExpressError(`No such company: ${code}`, 404)
+      //   res.status(404).send({ message: `Can't find company with code of ${code}`
+      // })
+      throw new ExpressError(`No such company: ${code}`, 404)
     } else {
         return res.json({ status: "deleted" })
       }
