@@ -33,7 +33,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
 
   return res.json({
-    error: err,
+    // error: err,
+    // this error line was making me get double messages DO NOT PUT THAT IN THERE 
     message: err.message
   });
 });

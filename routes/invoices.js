@@ -73,11 +73,25 @@ router.put('/:id', async (req, res, next) => {
     try {
       let { id } = req.params;
       console.log("id:", id)
-      let { amt } = req.body; 
-      const result = await db.query('UPDATE invoices SET amt=$2 WHERE id=$1 RETURNING id, comp_code, amt, paid, add_date, paid_date', [id, amt])
-      if (result.rows.length === 0) {
-        res.status(404).send({ message: `Can't update invoice with id of ${id}`
-      })}
+      let { amt, paid } = req.body; 
+      let paid_date = null
+
+      const currResult = await db.query(`SELECT paid_date from invoices WHERE id = $1`, [id])
+
+      if (currResult.rows.length === 0) {
+        throw new ExpressError(`No such company: ${code}`, 404)
+      }
+
+      if(paid === true && currResult.rows[0].paid_date === null) {
+        paid_date = new Date();
+      } else if(paid === false) {
+        paid_date = null;
+      } else {
+        paid_date = currResult.rows[0].paid_date
+      }
+
+      const result = await db.query('UPDATE invoices SET amt=$2, paid=$3, paid_date=$4 WHERE id=$1 RETURNING id, comp_code, amt, paid, add_date, paid_date', [id, amt, paid, paid_date])
+ 
       return res.send({ invoice: result.rows[0] })
     } catch (e) {
       return next(e)

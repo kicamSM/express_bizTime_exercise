@@ -3,20 +3,25 @@ process.env.NODE_ENV = "test"
 const request = require("supertest");
 
 const app = require("../app");
-// const { createData } = require("../_test-common");
+const { createData } = require("../test-common");
 const db = require("../db");
 
-beforeEach(async function() {
-    await db.query("DELETE FROM invoices");
-    await db.query("DELETE FROM companies");
-    await db.query("SELECT setval('invoices_id_seq', 1, false)");
-    // this is setting the value of the invoices Id to one
+// helpful resources jest --watch 
+// note these tests are consistently passing when running jest companies.test.js but failing when running jest as whole. There may be a race condition that is throwing something off. 
+
+beforeEach(createData);
+
+// beforeEach(async function() {
+//     await db.query("DELETE FROM invoices");
+//     await db.query("DELETE FROM companies");
+//     await db.query("SELECT setval('invoices_id_seq', 1, false)");
+//     // this is setting the value of the invoices Id to one
     
-    await db.query(`INSERT INTO companies (code, name, description) VALUES ('chey', 'Cheyenne Capidolls', 'A roller derby team'), ('roc', 'Bittersweet Bombshells', 'A Rock Springs Roller Derby Team')`);
+//     await db.query(`INSERT INTO companies (code, name, description) VALUES ('chey', 'Cheyenne Capidolls', 'A roller derby team'), ('roc', 'Bittersweet Bombshells', 'A Rock Springs Roller Derby Team')`);
 
-    db.query(`INSERT INTO invoices (comp_code, amt, paid, paid_date) VALUES ('chey', 100, true, '2023-06-10'), ('chey', 50, true, '2022-03-07'), ('roc', 70, false, '2022-01-01')`)
+//     db.query(`INSERT INTO invoices (comp_code, amt, paid, paid_date) VALUES ('chey', 100, true, '2023-06-10'), ('chey', 50, true, '2022-03-07'), ('roc', 70, false, '2022-01-01')`)
 
-});
+// });
 
 afterAll(async () => {
     await db.end()
@@ -98,7 +103,7 @@ describe('DELETE companies/:code/', function () {
     test('returns 404 for non existent company', async function() {
         const res = await request(app).delete("/companies/madeUp");
         expect(res.body).toEqual({
-            message: "Can't find company with code of madeUp"
+            message: "No such company: madeUp"
             });
         })
 })
