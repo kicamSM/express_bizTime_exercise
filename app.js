@@ -7,12 +7,14 @@ const ExpressError = require("./expressError")
 
 const companiesRoutes = require("./routes/companies");
 const invoicesRoutes = require("./routes/invoices");
+const industriesRoutes = require("./routes/industries");
 
 const app = express();
 app.use(express.json());
 
 app.use("/companies", companiesRoutes);
 app.use("/invoices", invoicesRoutes);
+app.use("/industries", industriesRoutes);
 app.get('/favicon.ico', (req, res) => res.sendStatus(204))
 // this is caussing the issue with the server.
 // app.use((req, res, next) => {
